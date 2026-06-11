@@ -34,7 +34,7 @@ router.get('/:id', async(req, res) =>{
   });
 })
 
-router.post('/comment/:blogId', async(req, res)=>{
+router.post('/comments/:blogId', async(req, res)=>{
   const comment = await Comment.create({
     content: req.body.content,
     blogId: req.params.blogId,
@@ -51,8 +51,36 @@ router.post('/', upload.single('coverImage'),async(req, res) =>{
     createdBy: req.user._id,
     coverImageURL: `/uploads/${req.file.filename}`,
   });
-
   return res.redirect(`/blog/${blog._id}`);
 });
+
+
+router.post("/delete/:id", async (req, res) => {
+  const blog = await Blog.findById(req.params.id);
+
+  if (blog.createdBy.toString() !== req.user._id.toString()) {
+    return res.status(403).send("Not authorized");
+  }
+
+  await Blog.findByIdAndDelete(req.params.id);
+  res.redirect("/");
+});
+
+router.post("/comment/delete/:id", async (req, res) => {
+  const comment = await Comment.findById(req.params.id);
+
+  if (!comment) {
+    return res.status(404).send("Comment not found");
+  }
+
+  if (comment.createdBy.toString() !== req.user._id.toString()) {
+    return res.status(403).send("Not authorized");
+  }
+
+  await Comment.findByIdAndDelete(req.params.id);
+
+  res.redirect(`/blog/${comment.blogId}`);
+});
+
 
 module.exports = router;

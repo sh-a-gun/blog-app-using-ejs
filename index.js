@@ -2,6 +2,8 @@ const path = require("path");
 const express = require("express");
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const methodOverride = require('method-override')
+
 const { checkForAuthCookie } = require('./middlewares/auth');
 
 const Blog = require('./models/blog');
@@ -22,6 +24,8 @@ app.set("views", path.resolve("./views"));
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cookieParser());
+app.use(methodOverride("_method"));
+
 app.use(checkForAuthCookie("token"));
 app.use(express.static(path.resolve('./public')));
 
